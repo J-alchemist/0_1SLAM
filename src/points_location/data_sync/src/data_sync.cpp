@@ -385,7 +385,7 @@ bool DataSync::AdjustCloud(CloudData::CLOUD_PTR& input_cloud_ptr, CloudData::CLO
     CloudData::CLOUD_PTR  origin_cloud_ptr(new CloudData::CLOUD(*input_cloud_ptr)); 
     output_cloud_ptr.reset(new CloudData::CLOUD());
     // calc start point angle
-    float start_orientation = atan2(origin_cloud_ptr->points[0].y,  origin_cloud_ptr->points[0].x); //计算起始点z轴的旋转角度 弧度返回
+    float start_orientation = atan2(origin_cloud_ptr->points[0].y,  origin_cloud_ptr->points[0].x); //计算起始点z轴的旋转角度 弧度返回 雷达坐标系x向前，y向左
     // 构造旋转矩阵
     Eigen::Matrix3f rotate_matrix = Eigen::AngleAxisf(start_orientation, Eigen::Vector3f::UnitZ()).matrix();
     // 构造变换矩阵
