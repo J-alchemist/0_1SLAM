@@ -1,0 +1,17 @@
+<launch>
+
+	<param name="use_sim_time" value="false" />
+
+	<param name="lidar_frame_id" type = "string" value="/rslidar" />
+	<param name="imu_frame_id" type = "string" value="/imu" />
+	
+	<param name="sys_mode"   type = "string" value = "matching" />
+	<param name="origin_lon" type = "double" value = "8.39045533533" />
+	<param name="origin_lat" type = "double" value = "48.9826576154" />
+	<param name="origin_alt" type = "double" value = "116.39641207" />
+
+	<include file="$(find data_sync)/launch/data_sync_node.launch" />
+	<include file="$(find matching)/launch/matching_node.launch" />
+	<node pkg="rviz"  type="rviz"  name="rviz"  args="-d $(find matching)/config/matching.rviz" /> 
+
+</launch>

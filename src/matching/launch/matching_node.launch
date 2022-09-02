@@ -1,0 +1,8 @@
+<launch>
+    <node
+        pkg="matching"
+        type="matching_node"
+        name="matching_node"
+        output = "screen">
+    </node>
+</launch>

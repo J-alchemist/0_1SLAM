@@ -1,0 +1,10 @@
+<launch>
+    <node
+        pkg="loop_closing"
+        type="loop_closing_node"
+        name="loop_closing_node"
+        output = "screen">
+    </node>
+</launch>
+
+

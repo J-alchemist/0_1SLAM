@@ -1,0 +1,10 @@
+<launch>
+    <node
+        pkg="nonlinear_optimize"
+        type="rebuild_map_node"
+        name="rebuild_map_node"
+        output = "screen">
+    </node>
+</launch>
+
+

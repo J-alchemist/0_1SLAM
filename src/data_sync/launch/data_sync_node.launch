@@ -1,0 +1,8 @@
+<launch>
+    <node
+        pkg="data_sync"
+        type="data_sync_node"
+        name="data_sync_node"
+        output = "screen">
+    </node>
+</launch>

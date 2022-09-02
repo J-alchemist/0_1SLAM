@@ -1,0 +1,10 @@
+<launch>
+    <node
+        pkg="nonlinear_optimize"
+        type="nonlinear_optimize_node"
+        name="nonlinear_optimize_node"
+        output = "screen">
+    </node>
+</launch>
+
+
