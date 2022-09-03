@@ -2,7 +2,7 @@
 # map_path: /home/gj/Desktop/0_1SLAM/map.pcd
 map_path: /home/gj/Desktop/0_1SLAM/filtered_map.pcd
 # 匹配
-registration_method: NDT   # 选择点云匹配方法，目前支持：NDT \ ICP
+registration_method: NDT   # 选择点云匹配方法，目前支持: NDT \ ICP
 
 # 当前帧
 # no_filter指不对点云滤波，在匹配中，理论上点云越稠密，精度越高，但是速度也越慢
@@ -31,7 +31,7 @@ ICP:
     trans_eps : 0.01
     max_iter : 30
 
-## 滤波相关参数   体素体积为0.9m^3的立方体
+## 滤波相关参数
 voxel_filter: 
     global_map:
         leaf_size: [0.9, 0.9, 0.9]

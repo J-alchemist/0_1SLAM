@@ -14,11 +14,11 @@ class VoxelFilter: public CloudFilterInterface {
     bool Filter(const CloudData::CLOUD_PTR& input_cloud_ptr, CloudData::CLOUD_PTR& filtered_cloud_ptr) override;
 
   private:
-    bool SetFilterParam(float leaf_size_x, float leaf_size_y, float leaf_size_z);
+    bool SetFilterParam(float leaf_size_x, float leaf_size_y, float leaf_size_z);  // m为单位，空间划分为删格
 
   private:
-    pcl::VoxelGrid<CloudData::POINT> voxel_filter_;
-    //pcl::ApproximateVoxelGrid<CloudData::POINT> voxel_filter_;
+    pcl::VoxelGrid<CloudData::POINT> voxel_filter_; //VoxelGrid以体素栅格重心来代表这个立方体
+    //pcl::ApproximateVoxelGrid<CloudData::POINT> voxel_filter_;  // 中心，效果略差，速度稍快
 };
 
 #endif

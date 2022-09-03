@@ -6,9 +6,10 @@
 	<param name="imu_frame_id" type = "string" value="/imu" />
 	
 	<param name="sys_mode"   type = "string" value = "matching" />
-	<param name="origin_lon" type = "double" value = "8.39045533533" />
-	<param name="origin_lat" type = "double" value = "48.9826576154" />
-	<param name="origin_alt" type = "double" value = "116.39641207" />
+	<!--建图时的原点-->
+	<param name="origin_lon" type = "double" value = "8.39036821669" />
+	<param name="origin_lat" type = "double" value = "48.9825479006" />
+	<param name="origin_alt" type = "double" value = "116.382487272" />
 
 	<include file="$(find data_sync)/launch/data_sync_node.launch" />
 	<include file="$(find matching)/launch/matching_node.launch" />

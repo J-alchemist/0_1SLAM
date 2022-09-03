@@ -39,7 +39,7 @@ class Matching  {
         ros::NodeHandle nh_;
         ros::Subscriber cloudSub_, gnssSub_;
         ros::Publisher global_map_pub_, local_map_pub_, current_scan_pub_,laser_odom_pub_;
-        ros::Publisher laser_2dpose_pub_;
+        ros::Publisher laser_2dpose_pub_, gnss_2dpose_pub_;
         TFConvert::ptr laser_tf_pub_;
         std::shared_ptr<OdomPublisher> laser_odom_pub_ptr_;
         std::shared_ptr<CloudPublisher> current_scan_pub_ptr_;
@@ -112,7 +112,7 @@ class Matching  {
         bool ResetLocalMap(float x, float y, float z);
 
         void GetGlobalMap(CloudData::CLOUD_PTR& global_map);
-        void GetLocalMap(CloudData::CLOUD_PTR& global_map);
+        void GetLocalMap(CloudData::CLOUD_PTR& local_map);
         
 };
 

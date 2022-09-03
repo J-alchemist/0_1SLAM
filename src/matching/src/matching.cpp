@@ -26,11 +26,11 @@ Matching::Matching(ros::NodeHandle& nh, std::string& lidar_frame_id) :
   
     laser_odom_pub_ = nh_.advertise<nav_msgs::Odometry>("/laser_localization", 100);
     laser_odom_pub_ptr_ = std::make_shared<OdomPublisher>(laser_odom_pub_, "/map", lidar_frame_id_);
-    // 发布一个2d位姿
-    laser_2dpose_pub_ = nh.advertise<geometry_msgs::Pose2D>("/laser_2d_pose", 100);
-
     laser_tf_pub_ = std::make_shared<TFConvert>("/map", lidar_frame_id_);
     
+    // 发布一个2d位姿
+    laser_2dpose_pub_ = nh.advertise<geometry_msgs::Pose2D>("/laser_2d_pose", 100);
+    gnss_2dpose_pub_ = nh.advertise<geometry_msgs::Pose2D>("/gnss_2d_pose", 100);
 // Other Init 
     InitWithConfig();                //初始化配置参数
     InitGlobalMap();                 //加载全局地图进行滤波
@@ -73,9 +73,9 @@ void Matching::Exec() {
 
 bool Matching::UpdateMatching() { 
 
-    if (!has_inited_) {
-        // 以第一帧gnss数据去分割一个小地图进行匹配，后续不需要gnss
-        // 此处需要注意,是否需要存储建图时的gnss原点
+    if (!has_inited_) { 
+        // 以第一帧gnss数据去分割一个小地图进行匹配，后续不需要gnss 
+        // 此处需要注意,是否需要存储建图时的gnss原点 
         this->SetGNSSPose(current_gnss_data_.pose); 
     } 
 
@@ -96,6 +96,10 @@ bool Matching::PublishData() {
     pose2d.y =  laser_odometry_(1,3);
     pose2d.theta = 0; 
     laser_2dpose_pub_.publish(pose2d); 
+    pose2d.x = (current_gnss_data_.pose)(0,3);
+    pose2d.y =  (current_gnss_data_.pose)(1,3);
+    pose2d.theta = 0; 
+    gnss_2dpose_pub_.publish(pose2d);
 
 }
 
@@ -155,23 +159,23 @@ bool Matching::HasData() {
     if (gnss_data_buff_.size()==0)      // 一定放在最后判断  因为初始化完成后，就不需要gnss了，此条件不重要了
         return false;
 
-
     return true;
 }
 
 bool Matching::ValidData() {
     current_cloud_data_ = cloud_data_buff_.front();
+    current_gnss_data_ = gnss_data_buff_.front();
 
     // gnss数据已经给到了局部地图初始化，后续不需要gnss数据，不用再对齐了
     if (has_inited_) {
         cloud_data_buff_.pop_front();
-        gnss_data_buff_.clear();
+
+        gnss_data_buff_.pop_front();    // 若不需要发布gnss2d_pose，注释此句，打开clear
+        // gnss_data_buff_.clear();
         return true;
     }
 
-    // gnss数据还未使用，执行对齐
-    current_gnss_data_ = gnss_data_buff_.front();
-
+    // gnss数据还未使用，执行对齐 --------------------------------
     double diff_time = current_cloud_data_.time - current_gnss_data_.time;
     if (diff_time < -0.05) {
         cloud_data_buff_.pop_front();
@@ -200,14 +204,13 @@ bool Matching::InitWithConfig() {
     // 读取匹配方式 
     InitRegistrationMethod(registration_ptr_, cn);
     // 获取滤波方式
-    InitFilter("global_map", global_map_filter_ptr_, cn);
-    InitFilter("local_map", local_map_filter_ptr_, cn); 
+    InitFilter("global_map", global_map_filter_ptr_, cn);   // 只是为了显示
+    InitFilter("local_map", local_map_filter_ptr_, cn);     // 调节点云稀疏，匹配效果
     InitFilter("frame", frame_filter_ptr_, cn); 
     // 滑动窗口分割
     box_filter_ptr_ = std::make_shared<BoxFilter>(cn);
 
     return true;
-
 }
 
 /**
@@ -297,7 +300,8 @@ bool Matching::Update(const CloudData& cloud_data, Eigen::Matrix4f& cloud_pose) 
     // 计算当前位置到当前局部地图的x，y，z三个方向的距离，有一个方向小于50，则
     // 以当前位置为原点origin，重新分割出一个局部地图
     std::vector<float> edge = box_filter_ptr_->GetEdge();  
-    for (int i = 0; i < 3; i++) { 
+    for (int i = 0; i < 3; i++) {   // 三个方向
+
         if (fabs(cloud_pose(i, 3) - edge.at(2 * i)) > 50.0 &&
             fabs(cloud_pose(i, 3) - edge.at(2 * i + 1)) > 50.0)
             continue;
@@ -315,7 +319,7 @@ bool Matching::InitGlobalMap() {
     if (global_map_ptr_->points.size()==0)
         return false; 
 
-    local_map_filter_ptr_->Filter(global_map_ptr_, global_map_ptr_);    //地图滤波 
+    local_map_filter_ptr_->Filter(global_map_ptr_, global_map_ptr_);    //地图滤波  匹配效果
     std::cout << "filtered global map size: " << global_map_ptr_->points.size() << std::endl;
 
     has_new_global_map_ = true;     // 拿到全局地图  
@@ -328,12 +332,12 @@ bool Matching::SetGNSSPose(const Eigen::Matrix4f& gnss_pose) {
 
     static int gnss_cnt = 0; 
     if (gnss_cnt == 0) {            // 第一帧gnss数据拿去分割局部地图，等待一会儿
-
         init_pose_ = gnss_pose;     // gnss位姿作为分割区域的中心点
         ResetLocalMap(init_pose_(0,3), init_pose_(1,3), init_pose_(2,3));   //分割出局部地图
 
     } else if (gnss_cnt > 3) { 
         has_inited_ = true;     // gnss数据已经给到了局部地图初始化
+
     } 
     gnss_cnt ++; 
     return true; 
@@ -342,11 +346,8 @@ bool Matching::SetGNSSPose(const Eigen::Matrix4f& gnss_pose) {
 /**
  * 分割局部地图 
 */
-bool Matching::ResetLocalMap(float x, float y, float z) {
-
-    if (!has_new_global_map_) 
-        return false;
-
+bool Matching::ResetLocalMap(float x, float y, float z) { 
+    static int generate_cnt = 0;
     std::vector<float> origin = {x, y, z};
     box_filter_ptr_->SetOrigin(origin);
     box_filter_ptr_->Filter(global_map_ptr_, local_map_ptr_);   // 从全局分割局部地图
@@ -356,19 +357,20 @@ bool Matching::ResetLocalMap(float x, float y, float z) {
 
     std::vector<float> edge = box_filter_ptr_->GetEdge();
 
-    // std::cout  << "new local map: [" << edge.at(0) << " " <<  edge.at(2) << " " << edge.at(4) << "] ["               \
-                                    <<  edge.at(1) << " " <<  edge.at(3) << " " << edge.at(5) << "]" << std::endl;
-    std::cout << "new local map generate..." << std::endl << std::endl;
+    std::cout  << "\nNew Box from origin: [" << x << " " << y << " " << z << "]"
+                 << " to points: [" << edge.at(0) << " " <<  edge.at(2) << " " << edge.at(4) 
+                    << "] and [" <<  edge.at(1) << " " <<  edge.at(3) << " " << edge.at(5) << "]" << std::endl;
+    std::cout  << "New local map generate!!! " << ++generate_cnt << "_times." << std::endl << std::endl;
 
-    return true;
-}
+    return true; 
+} 
 
 void Matching::GetGlobalMap(CloudData::CLOUD_PTR& global_map) {
     global_map_filter_ptr_->Filter(global_map_ptr_, global_map); 
 }
 
-void Matching::GetLocalMap(CloudData::CLOUD_PTR& global_map) {
-    global_map = local_map_ptr_;
+void Matching::GetLocalMap(CloudData::CLOUD_PTR& local_map) {
+    local_map = local_map_ptr_;
 }
 
 
