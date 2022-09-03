@@ -1,6 +1,6 @@
 # 地图存放路径
-# map_path: /home/gj/Desktop/0_1SLAM/src/mapsData/map.pcd
-map_path: /home/gj/Desktop/0_1SLAM/src/mapsData/filtered_map.pcd
+# map_path: /home/gj/Desktop/0_1SLAM/map.pcd
+map_path: /home/gj/Desktop/0_1SLAM/filtered_map.pcd
 # 匹配
 registration_method: NDT   # 选择点云匹配方法，目前支持：NDT \ ICP
 

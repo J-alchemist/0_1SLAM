@@ -26,8 +26,11 @@ Matching::Matching(ros::NodeHandle& nh, std::string& lidar_frame_id) :
   
     laser_odom_pub_ = nh_.advertise<nav_msgs::Odometry>("/laser_localization", 100);
     laser_odom_pub_ptr_ = std::make_shared<OdomPublisher>(laser_odom_pub_, "/map", lidar_frame_id_);
+    // 发布一个2d位姿
+    laser_2dpose_pub_ = nh.advertise<geometry_msgs::Pose2D>("/laser_2d_pose", 100);
 
     laser_tf_pub_ = std::make_shared<TFConvert>("/map", lidar_frame_id_);
+    
 // Other Init 
     InitWithConfig();                //初始化配置参数
     InitGlobalMap();                 //加载全局地图进行滤波
@@ -40,19 +43,21 @@ Matching::~Matching() {
 
 void Matching::Exec() {
 
-//1阶段  主要是显示
-    if (has_new_global_map_ && !global_map_pub_.getNumSubscribers()) {
-
+    // 全局
+    if (has_new_global_map_ && global_map_pub_.getNumSubscribers()!=0 ) {
         CloudData::CLOUD_PTR  global_map(new CloudData::CLOUD());
         this->GetGlobalMap(global_map);     // 全局地图显示卡可以适当 稀疏 
         global_map_pub_ptr_->Publish(global_map);       // 发布全局地图
+        has_new_global_map_ = false;
+    } 
+    // 局部
+    if (has_new_local_map_ && local_map_pub_.getNumSubscribers()!=0 ) { 
+        CloudData::CLOUD_PTR  local_map(new CloudData::CLOUD());
+        this->GetLocalMap(local_map);       
+        local_map_pub_ptr_->Publish(local_map);
+        has_new_local_map_ = false;
     }
 
-    if (has_new_local_map_ && !local_map_pub_.getNumSubscribers()) { 
-        local_map_pub_ptr_->Publish(this->GetLocalMap());
-    }
-
-//2阶段 匹配及位姿发布
     if (!ReadData()) 
         return;
 
@@ -84,6 +89,14 @@ bool Matching::PublishData() {
     laser_odom_pub_ptr_->Publish(laser_odometry_, current_cloud_data_.time);
     // 当前匹配帧
     current_scan_pub_ptr_->Publish(current_scan_ptr_);
+
+    // 2d位姿发布
+    geometry_msgs::Pose2D pose2d;
+    pose2d.x = laser_odometry_(0,3);
+    pose2d.y =  laser_odometry_(1,3);
+    pose2d.theta = 0; 
+    laser_2dpose_pub_.publish(pose2d); 
+
 }
 
 void Matching::getSyncCloudMsgCallBack(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg_ptr) {
@@ -224,7 +237,7 @@ bool Matching::InitRegistrationMethod(std::shared_ptr<RegistrationInterface>& re
 */
 bool Matching::InitFilter(std::string filter_user, std::shared_ptr<CloudFilterInterface>& filter_ptr, const YAML::Node& config_node) {
     std::string filter_mothod = config_node[filter_user + "_filter"].as<std::string>();
-    std::cout << "[Map_Matching-obj]: " << filter_user << " " 
+    std::cout << "[Map_Matching for]: " << filter_user << " " 
             << "[Filter_Method]: " << filter_mothod << std::endl;
 
     if (filter_mothod == "voxel_filter") { 
@@ -295,15 +308,15 @@ bool Matching::Update(const CloudData& cloud_data, Eigen::Matrix4f& cloud_pose) 
     return true;
 }
 
-bool Matching::InitGlobalMap() {
+bool Matching::InitGlobalMap() { 
 
     pcl::io::loadPCDFile(map_path_, *global_map_ptr_);    // 加载
-    std::cout << "_________global map size: " << global_map_ptr_->points.size() << std::endl;
+    std::cout << "     raw global map size: " << global_map_ptr_->points.size() << std::endl;
     if (global_map_ptr_->points.size()==0)
         return false; 
 
     local_map_filter_ptr_->Filter(global_map_ptr_, global_map_ptr_);    //地图滤波 
-    std::cout << "filtered global map size: "  << global_map_ptr_->points.size() << std::endl;
+    std::cout << "filtered global map size: " << global_map_ptr_->points.size() << std::endl;
 
     has_new_global_map_ = true;     // 拿到全局地图  
 
@@ -345,17 +358,17 @@ bool Matching::ResetLocalMap(float x, float y, float z) {
 
     // std::cout  << "new local map: [" << edge.at(0) << " " <<  edge.at(2) << " " << edge.at(4) << "] ["               \
                                     <<  edge.at(1) << " " <<  edge.at(3) << " " << edge.at(5) << "]" << std::endl;
+    std::cout << "new local map generate..." << std::endl << std::endl;
 
     return true;
 }
 
-void Matching::GetGlobalMap(CloudData::CLOUD_PTR& global_map){
+void Matching::GetGlobalMap(CloudData::CLOUD_PTR& global_map) {
     global_map_filter_ptr_->Filter(global_map_ptr_, global_map); 
-    has_new_global_map_ = false;
 }
 
-CloudData::CLOUD_PTR& Matching::GetLocalMap(){
-    return local_map_ptr_;
+void Matching::GetLocalMap(CloudData::CLOUD_PTR& global_map) {
+    global_map = local_map_ptr_;
 }
 
 

@@ -18,7 +18,8 @@ int main(int argc, char **argv){
     nh.param<double>("origin_alt", MyOrigin[2], 116.39641207);
 
     DataSync::ptr ds_ptr = std::make_shared<DataSync>(nh, imu_frame_id, lidar_frame_id, Sys_Mode, MyOrigin);
-
+    std::cout << "________Sys_Mode: " << Sys_Mode << std::endl << std::endl;
+    
     ros::Rate r(100);
     while (ros::ok()) { 
         ros::spinOnce();

@@ -10,8 +10,7 @@ Panels:
         - /trajectory1/gnss_pose1/Shape1
         - /trajectory1/laser_odom1/Shape1
         - /PointCloud1
-        - /TF1/Tree1
-      Splitter Ratio: 0.5
+      Splitter Ratio: 0.567723334
     Tree Height: 463
   - Class: rviz/Selection
     Name: Selection
@@ -31,7 +30,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: Image
+    SyncSource: global_map
 Toolbars:
   toolButtonStyle: 2
 Visualization Manager:
@@ -141,7 +140,7 @@ Visualization Manager:
       Name: trajectory
     - Class: rviz/Group
       Displays:
-        - Alpha: 0.300000012
+        - Alpha: 0.100000001
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 9.32850266
@@ -151,9 +150,9 @@ Visualization Manager:
           Channel Name: intensity
           Class: rviz/PointCloud2
           Color: 255; 255; 255
-          Color Transformer: AxisColor
+          Color Transformer: Intensity
           Decay Time: 0
-          Enabled: true
+          Enabled: false
           Invert Rainbow: false
           Max Color: 255; 255; 255
           Max Intensity: 4096
@@ -163,14 +162,14 @@ Visualization Manager:
           Position Transformer: XYZ
           Queue Size: 10
           Selectable: true
-          Size (Pixels): 3
+          Size (Pixels): 1
           Size (m): 0.00999999978
           Style: Points
           Topic: /local_map
           Unreliable: false
           Use Fixed Frame: true
           Use rainbow: true
-          Value: true
+          Value: false
         - Alpha: 0.300000012
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
@@ -181,9 +180,9 @@ Visualization Manager:
           Channel Name: intensity
           Class: rviz/PointCloud2
           Color: 255; 255; 255
-          Color Transformer: FlatColor
+          Color Transformer: Intensity
           Decay Time: 0
-          Enabled: false
+          Enabled: true
           Invert Rainbow: false
           Max Color: 255; 255; 255
           Max Intensity: 4096
@@ -193,19 +192,19 @@ Visualization Manager:
           Position Transformer: XYZ
           Queue Size: 10
           Selectable: true
-          Size (Pixels): 3
+          Size (Pixels): 1
           Size (m): 0.00999999978
           Style: Points
           Topic: /global_map
           Unreliable: false
           Use Fixed Frame: true
           Use rainbow: true
-          Value: false
+          Value: true
         - Alpha: 1
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
-            Max Value: 6.50222826
-            Min Value: -10.2806635
+            Max Value: 5.27915382
+            Min Value: -14.4059067
             Value: true
           Axis: Z
           Channel Name: intensity
@@ -213,7 +212,7 @@ Visualization Manager:
           Color: 255; 255; 255
           Color Transformer: AxisColor
           Decay Time: 0
-          Enabled: false
+          Enabled: true
           Invert Rainbow: false
           Max Color: 255; 255; 255
           Max Intensity: 255
@@ -223,14 +222,14 @@ Visualization Manager:
           Position Transformer: XYZ
           Queue Size: 10
           Selectable: true
-          Size (Pixels): 4
+          Size (Pixels): 1
           Size (m): 0.400000006
           Style: Points
           Topic: /current_scan
           Unreliable: false
           Use Fixed Frame: true
           Use rainbow: true
-          Value: false
+          Value: true
       Enabled: true
       Name: PointCloud
     - Class: rviz/TF
@@ -238,40 +237,18 @@ Visualization Manager:
       Frame Timeout: 999999
       Frames:
         All Enabled: false
-        base_link:
-          Value: false
-        camera_color_left:
-          Value: false
-        camera_color_right:
-          Value: false
-        camera_gray_left:
-          Value: false
-        camera_gray_right:
-          Value: false
-        imu_link:
-          Value: false
-        map:
-          Value: true
-        rslidar:
-          Value: true
-        velo_link:
-          Value: false
-        world:
-          Value: false
       Marker Scale: 50
       Name: TF
-      Show Arrows: false
+      Show Arrows: true
       Show Axes: true
-      Show Names: false
+      Show Names: true
       Tree:
-        map:
-          rslidar:
-            {}
+        {}
       Update Interval: 0
       Value: true
   Enabled: true
   Global Options:
-    Background Color: 48; 48; 48
+    Background Color: 0; 0; 0
     Default Light: true
     Fixed Frame: map
     Frame Rate: 30
@@ -293,26 +270,26 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Class: rviz/Orbit
-      Distance: 137.057739
+      Class: rviz/XYOrbit
+      Distance: 335.204285
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 8.7274189
-        Y: 27.0409031
-        Z: -8.90399361
-      Focal Shape Fixed Size: false
+        X: 79.4303818
+        Y: -102.201706
+        Z: -1.37194979
+      Focal Shape Fixed Size: true
       Focal Shape Size: 0.0500000007
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 1.27479637
-      Target Frame: vehicle_link
-      Value: Orbit (rviz)
-      Yaw: 4.58857679
+      Pitch: 0.784795821
+      Target Frame: rslidar
+      Value: XYOrbit (rviz)
+      Yaw: 3.68722439
     Saved: ~
 Window Geometry:
   Displays:

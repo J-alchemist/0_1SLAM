@@ -1,0 +1,27 @@
+<launch>
+
+	<param name="use_sim_time" value="false" />
+
+	<param name="lidar_frame_id" type = "string" value="/rslidar" />
+	<param name="imu_frame_id" type = "string" value="/imu" />
+	<!--系统模式：建图-->
+	<param name="sys_mode" type = "string" value="mapping" />
+
+	<!--前端里程计扩展-->
+    #a-loam前端需要订阅的雷达数据话题/velodyne_points，那么我们系统的数据处理部分发布的话题名设置就为这个
+    <param name="cloud_topic" type="string" value="/velodyne_points" />
+    #a-loam发布的优化之后的里程计/aft_mapped_to_init，那么我们系统的后端优化订阅的名字就设置为这个
+    <param name="odom_topic" type="string" value="/aft_mapped_to_init" />
+    #另外不要关闭a-loam的rviz
+    <include file="$(find aloam_velodyne)/launch/aloam_velodyne_HDL_64.launch"/>
+	<!---->
+
+	<include file="$(find data_sync)/launch/data_sync_node.launch" />
+	<include file="$(find nonlinear_optimize)/launch/nonlinear_optimize_node.launch" />
+	<include file="$(find loop_closing)/launch/loop_closing_node.launch" />
+	<include file="$(find nonlinear_optimize)/launch/rebuild_map_node.launch" />
+	<node pkg="rviz"  type="rviz"  name="rviz"  args="-d $(find lidar_odom)/config/mapping.rviz" /> 
+	
+</launch>
+
+
